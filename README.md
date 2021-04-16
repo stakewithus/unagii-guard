@@ -12,3 +12,10 @@ source venv/bin/activate
 pip install vyper==0.2.11
 pip install eth-brownie
 ```
+
+### Test
+
+```shell
+# unit
+brownie test tests/unit/NoFlashLoanErc20/test_deposit.py --gas -s
+```

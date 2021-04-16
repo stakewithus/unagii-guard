@@ -24,3 +24,13 @@ def transfer(_to: address, _shares: uint256) -> bool:
     self.balanceOf[msg.sender] -= _shares
     self.balanceOf[_to] += _shares
     return True
+
+@external
+def transferFrom(_from: address, _to: address, _shares: uint256) -> bool:
+    self.balanceOf[_from] -= _shares
+    self.balanceOf[_to] += _shares
+    return True
+
+@external
+def approve(_spender: address, _amount: uint256) -> bool:
+    return True
