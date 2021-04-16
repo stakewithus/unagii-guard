@@ -1,7 +1,7 @@
 import brownie
 
 
-def test_flash_loan(
+def test_flash_loan_attack(
     accounts,
     erc20Vault,
     guardErc20,
@@ -18,7 +18,7 @@ def test_flash_loan(
     guard.setWhitelist(testErc20Deposit, True, {"from": admin})
     guard.setWhitelist(testErc20Withdraw, True, {"from": admin})
 
-    token._mint_(testErc20Deposit, 100)
+    token._mint_(testErc20Withdraw, 100)
 
     with brownie.reverts(""):
-        testErc20Deposit.deposit({"from": attacker})
+        testErc20Withdraw.attack({"from": attacker})

@@ -8,34 +8,21 @@ interface Guard:
     def deposit(_amount: uint256, _min: uint256): nonpayable
     def withdraw(_shares: uint256, _min: uint256): nonpayable
 
-interface TestWithdraw:
-    def withdraw(): nonpayable
-
 guard: address
-testWithdraw: address
+vault: address
+token: address
 
 @external
-def __init__(_guard: address, _testWithdraw: address):
+def __init__(_guard: address):
     self.guard = _guard
-    self.testWithdraw = _testWithdraw
+    self.vault = Guard(_guard).vault()
+    self.token = Guard(_guard).token()
 
 @external
-def deposit():
-    """
-    @dev Execute flash loan using different contracts for deposit and withdraw
-    @dev Deposit `token`, transfer shares to `TestWithdraw`, call `withdraw`
-    """
-    vault: address = Guard(self.guard).vault()
-    token: address = Guard(self.guard).token()
+def deposit(_amount: uint256, _min: uint256):
+    ERC20(self.token).transferFrom(msg.sender, self, _amount)
+    ERC20(self.token).approve(self.guard, _amount)
+    Guard(self.guard).deposit(_amount, _min)
 
-    bal: uint256 = ERC20(token).balanceOf(self)
-    assert bal > 0, "bal = 0"
-
-    ERC20(token).approve(self.guard, MAX_UINT256)
-    Guard(self.guard).deposit(bal, 1)
-
-    shares: uint256 = ERC20(vault).balanceOf(self)
-    assert shares > 0, "shares = 0"
-
-    ERC20(vault).transfer(self.testWithdraw, shares)
-    TestWithdraw(self.testWithdraw).withdraw()
+    shares: uint256 = ERC20(self.vault).balanceOf(self)
+    ERC20(self.vault).transfer(msg.sender, shares)
