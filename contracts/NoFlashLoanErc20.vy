@@ -148,7 +148,6 @@ def deposit(_amount: uint256, _min: uint256):
     assert not self.paused, "paused"
     assert self.whitelist[msg.sender], "!whitelist"
 
-    # TODO: integration test
     assert block.number > self.lastBlock[tx.origin], "no flash"
     # track EOA
     # tracking EOA prevents the following flash loan
