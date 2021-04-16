@@ -1,9 +1,12 @@
-# @version ^0.2.11
+# @version 0.2.11
+
+"""
+@title Unagii NoFlashLoanErc20
+@author stakewith.us
+@license AGPL-3.0-or-later
+"""
 
 from vyper.interfaces import ERC20 
-
-# TODO: license
-# TODO: comments
 
 interface Erc20Vault:
     def token() -> address: view
@@ -36,6 +39,11 @@ lastBlock: public(HashMap[address, uint256])
 
 @external
 def __init__(_vault: address):
+    """
+    @notice Contract constructor
+    @param _vault Address of ERC20 vault
+    """
+                    
     assert _vault != ZERO_ADDRESS, "vault = 0 address"
     self.admin = msg.sender
 
@@ -49,33 +57,51 @@ def __init__(_vault: address):
 
 @external
 def setNextAdmin(_nextAdmin: address):
+    """
+    @notice Set next admin
+    @param _nextAdmin Address of next admin
+    """
     assert msg.sender == self.admin, "!admin"
     # allow next admin = zero address
     self.nextAdmin = _nextAdmin
 
 @external
 def claimAdmin():
+    """
+    @notice Claim admin
+    @dev Only `nextAdmin` can claim admin 
+    """
     assert msg.sender == self.nextAdmin, "!next admin"
     self.admin = msg.sender
     self.nextAdmin = ZERO_ADDRESS
 
 @external
 def setPause(_paused: bool):
+    """
+    @notice Toggle pause contract
+    @param _paused Boolean flag
+    """
     assert msg.sender == self.admin, "!admin"
     self.paused = _paused
     log SetPause(_paused)
 
 @external
 def setWhitelist(_addr: address, _approved: bool):
+    """
+    @notice Approve or revoke an address to call deposit and withdraw
+    @param _approved Boolean flag
+    """
     assert msg.sender == self.admin, "!admin"
     self.whitelist[_addr] = _approved
     log SetWhitelist(_addr, _approved)
 
 @internal
 def _safeTransfer(_token: address, _to: address, _amount: uint256):
+    """
+    @dev "safeTransfer" which works for ERC20s which return bool or not
+    """
     assert _to != ZERO_ADDRESS, "to = 0 address"
 
-    # "safeTransfer" which works for ERC20s which return bool or not
     _response: Bytes[32] = raw_call(
         _token,
         concat(
@@ -90,9 +116,11 @@ def _safeTransfer(_token: address, _to: address, _amount: uint256):
 
 @internal
 def _safeTransferFrom(_token: address, _from: address, _to: address, _amount: uint256):
+    """
+    @dev "safeTransferFrom" which works for ERC20s which return bool or not
+    """
     assert _to != ZERO_ADDRESS, "to = 0 address"
 
-    # "safeTransferFrom" which works for ERC20s which return bool or not
     _response: Bytes[32] = raw_call(
         _token,
         concat(
@@ -109,6 +137,14 @@ def _safeTransferFrom(_token: address, _from: address, _to: address, _amount: ui
 @nonreentrant("lock")
 @external
 def deposit(_amount: uint256, _min: uint256):
+    """
+    @notice Deposit `token` into `vault`
+    @param _amount Amount of `token` to deposit
+    @param _min Minimum shares expected to return from Unagii vault
+    @dev Transfers Unagii vault shares back to caller
+    @dev Protects against flash loan attacks by preventing EOA to
+         deposit and withdraw in the same block
+    """
     assert not self.paused, "paused"
     assert self.whitelist[msg.sender], "!whitelist"
 
@@ -143,6 +179,14 @@ def deposit(_amount: uint256, _min: uint256):
 @nonreentrant("lock")
 @external
 def withdraw(_shares: uint256, _min: uint256):
+    """
+    @notice Withdraw `token` from `vault`
+    @param _shares Amount of Unagii vault shares to burn
+    @param _min Minimum token expected to return from Unagii vault
+    @dev Transfers `token` back to caller
+    @dev Protects against flash loan attacks by preventing EOA to
+         deposit and withdraw in the same block
+    """
     # allow withdraw even if paused = true
     assert self.whitelist[msg.sender], "!whitelist"
 
@@ -169,6 +213,9 @@ def withdraw(_shares: uint256, _min: uint256):
 
 @external
 def sweep(_token: address):
+    """
+    @notice Allow admin to claim dust and tokens that were accidentally sent
+    """
     assert msg.sender == self.admin, "!admin"
     bal: uint256 = ERC20(_token).balanceOf(self)
     ERC20(_token).transfer(self.admin, bal)
