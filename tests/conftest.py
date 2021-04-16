@@ -3,7 +3,7 @@ from brownie import (
     accounts,
     TestToken,
     Erc20Vault,
-    NoFlashLoanErc20,
+    GuardErc20,
     TestErc20Deposit,
     TestErc20Withdraw,
 )
@@ -25,8 +25,8 @@ def erc20Vault(Erc20Vault, token, admin):
 
 
 @pytest.fixture(scope="function")
-def noFlashLoanErc20(NoFlashLoanErc20, erc20Vault, admin):
-    yield NoFlashLoanErc20.deploy(erc20Vault, {"from": admin})
+def guardErc20(GuardErc20, erc20Vault, admin):
+    yield GuardErc20.deploy(erc20Vault, {"from": admin})
 
 
 @pytest.fixture(scope="session")
@@ -35,12 +35,10 @@ def attacker(accounts):
 
 
 @pytest.fixture(scope="function")
-def testErc20Withdraw(TestErc20Withdraw, noFlashLoanErc20, attacker):
-    yield TestErc20Withdraw.deploy(noFlashLoanErc20, {"from": attacker})
+def testErc20Withdraw(TestErc20Withdraw, guardErc20, attacker):
+    yield TestErc20Withdraw.deploy(guardErc20, {"from": attacker})
 
 
 @pytest.fixture(scope="function")
-def testErc20Deposit(TestErc20Deposit, noFlashLoanErc20, testErc20Withdraw, attacker):
-    yield TestErc20Deposit.deploy(
-        noFlashLoanErc20, testErc20Withdraw, {"from": attacker}
-    )
+def testErc20Deposit(TestErc20Deposit, guardErc20, testErc20Withdraw, attacker):
+    yield TestErc20Deposit.deploy(guardErc20, testErc20Withdraw, {"from": attacker})
