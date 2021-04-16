@@ -42,7 +42,6 @@ def __init__(_vault: address):
     self.vault = _vault
     self.token = Erc20Vault(_vault).token()
 
-    # TODO: safe transfer, safe approve
     # deposit
     ERC20(self.token).approve(self.vault, MAX_UINT256)
     # withdraw
@@ -72,6 +71,41 @@ def setWhitelist(_addr: address, _approved: bool):
     self.whitelist[_addr] = _approved
     log SetWhitelist(_addr, _approved)
 
+@internal
+def _safeTransfer(_token: address, _to: address, _amount: uint256):
+    assert _to != ZERO_ADDRESS, "to = 0 address"
+
+    # "safeTransfer" which works for ERC20s which return bool or not
+    _response: Bytes[32] = raw_call(
+        _token,
+        concat(
+            method_id("transfer(address,uint256)"),
+            convert(_to, bytes32),
+            convert(_amount, bytes32),
+        ),
+        max_outsize=32,
+    )
+    if len(_response) > 0:
+        assert convert(_response, bool), "transfer failed"  
+
+@internal
+def _safeTransferFrom(_token: address, _from: address, _to: address, _amount: uint256):
+    assert _to != ZERO_ADDRESS, "to = 0 address"
+
+    # "safeTransferFrom" which works for ERC20s which return bool or not
+    _response: Bytes[32] = raw_call(
+        _token,
+        concat(
+            method_id("transferFrom(address,address,uint256)"),
+            convert(_from, bytes32),
+            convert(_to, bytes32),
+            convert(_amount, bytes32),
+        ),
+        max_outsize=32,
+    )
+    if len(_response) > 0:
+        assert convert(_response, bool), "transfer from failed"  
+
 @nonreentrant("lock")
 @external
 def deposit(_amount: uint256, _min: uint256):
@@ -87,7 +121,7 @@ def deposit(_amount: uint256, _min: uint256):
     # 3. contract B calls withdraw
     self.lastBlock[tx.origin] = block.number
     
-    ERC20(self.token).transferFrom(msg.sender, self, _amount)
+    self._safeTransferFrom(self.token, msg.sender, self, _amount)
 
     # cache, saves about 2000 gas
     _vault: address = self.vault
@@ -101,6 +135,7 @@ def deposit(_amount: uint256, _min: uint256):
 
     assert sharesDiff >= _min, "shares < min"
 
+    # Vault returns bool, so no need to use _safeTransfer
     ERC20(_vault).transfer(msg.sender, sharesDiff)
 
     log Deposit(msg.sender, _amount)
@@ -119,6 +154,7 @@ def withdraw(_shares: uint256, _min: uint256):
     _vault: address = self.vault
     _token: address = self.token
 
+    # Vault returns bool, so no need to use _safeTransferFrom
     ERC20(_vault).transferFrom(msg.sender, self, _shares)
 
     balBefore: uint256 = ERC20(_token).balanceOf(self)
@@ -127,7 +163,7 @@ def withdraw(_shares: uint256, _min: uint256):
 
     diff: uint256 = balAfter - balBefore
 
-    ERC20(_token).transfer(msg.sender, diff)
+    self._safeTransfer(_token, msg.sender, diff)
 
     log Withdraw(msg.sender, diff)
 
