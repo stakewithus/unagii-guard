@@ -1,0 +1,10 @@
+reports:
+  exclude_paths:
+    - contracts/testing/*.*
+
+networks:
+  development:
+    cmd_settings:
+      accounts: 100
+
+autofetch_sources: True
