@@ -1,10 +1,10 @@
 import brownie
 
 
-def test_withdraw(accounts, guardErc20, admin, token, erc20Vault):
+def test_withdraw(accounts, guardEth, admin, ethVault):
     # rename fixtures
-    guard = guardErc20
-    vault = erc20Vault
+    guard = guardEth
+    vault = ethVault
 
     amount = 100
     min_shares = 1
@@ -13,9 +13,7 @@ def test_withdraw(accounts, guardErc20, admin, token, erc20Vault):
     guard.setWhitelist(sender, True, {"from": admin})
 
     # deposit
-    token._mint_(sender, amount)
-    token.approve(guardErc20, amount, {"from": sender})
-    guard.deposit(amount, min_shares, {"from": sender})
+    guard.deposit(min_shares, {"from": sender, "value": amount})
 
     # withdraw
     shares = vault.balanceOf(sender)
@@ -23,14 +21,14 @@ def test_withdraw(accounts, guardErc20, admin, token, erc20Vault):
 
     assert shares > 0
 
-    vault.approve(guardErc20, shares, {"from": sender})
+    vault.approve(guardEth, shares, {"from": sender})
 
     def snapshot():
         return {
-            "token": {
-                "sender": token.balanceOf(sender),
-                "guard": token.balanceOf(guard),
-                "vault": token.balanceOf(vault),
+            "eth": {
+                "sender": sender.balance(),
+                "guard": guard.balance(),
+                "vault": vault.balance(),
             },
             "vault": {
                 "sender": vault.balanceOf(sender),
@@ -43,11 +41,11 @@ def test_withdraw(accounts, guardErc20, admin, token, erc20Vault):
     tx = guard.withdraw(shares, min_underlying, {"from": sender})
     after = snapshot()
 
-    # check token transfer
-    assert after["token"]["sender"] == before["token"]["sender"] + amount
-    assert after["token"]["guard"] == 0
-    assert after["token"]["guard"] == before["token"]["guard"]
-    assert after["token"]["vault"] == before["token"]["vault"] - amount
+    # check eth transfer
+    assert after["eth"]["sender"] == before["eth"]["sender"] + amount
+    assert after["eth"]["guard"] == 0
+    assert after["eth"]["guard"] == before["eth"]["guard"]
+    assert after["eth"]["vault"] == before["eth"]["vault"] - amount
 
     # check shares transfer
     assert after["vault"]["sender"] < before["vault"]["sender"]
@@ -60,9 +58,9 @@ def test_withdraw(accounts, guardErc20, admin, token, erc20Vault):
     assert after["guard"]["lastBlock"]["sender"] == tx.block_number
 
 
-def test_withdraw_not_whitelist(accounts, guardErc20, admin, token):
-    amount = 100
+def test_withdraw_not_whitelist(accounts, guardEth, admin):
+    shares = 100
     min_underlying = 1
 
     with brownie.reverts("!whitelist"):
-        guardErc20.withdraw(amount, min_underlying, {"from": accounts[1]})
+        guardEth.withdraw(shares, min_underlying, {"from": accounts[1]})
