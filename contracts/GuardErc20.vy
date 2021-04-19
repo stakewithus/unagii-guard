@@ -43,8 +43,6 @@ def __init__(_vault: address):
     @notice Contract constructor
     @param _vault Address of ERC20 vault
     """
-                    
-    assert _vault != ZERO_ADDRESS, "vault = 0 address"
     self.admin = msg.sender
 
     self.vault = _vault
