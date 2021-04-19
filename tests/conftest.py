@@ -55,3 +55,13 @@ def testErc20Deposit(TestErc20Deposit, guardErc20, attacker):
 def testErc20Withdraw(TestErc20Withdraw, guardErc20, testErc20Deposit, attacker):
     yield TestErc20Withdraw.deploy(guardErc20, testErc20Deposit, {"from": attacker})
 
+
+@pytest.fixture(scope="function")
+def testEthDeposit(TestEthDeposit, guardEth, attacker):
+    yield TestEthDeposit.deploy(guardEth, {"from": attacker})
+
+
+@pytest.fixture(scope="function")
+def testEthWithdraw(TestEthWithdraw, guardEth, testEthDeposit, attacker):
+    yield TestEthWithdraw.deploy(guardEth, testEthDeposit, {"from": attacker})
+
