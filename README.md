@@ -11,6 +11,8 @@ source venv/bin/activate
 # install vyper
 pip install vyper==0.2.11
 pip install eth-brownie
+
+cp .env.sample .env
 ```
 
 ### Test
