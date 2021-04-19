@@ -76,7 +76,7 @@ def claimAdmin():
 @external
 def setPause(_paused: bool):
     """
-    @notice Toggle pause contract
+    @notice Pause / unpause contract
     @param _paused Boolean flag
     """
     assert msg.sender == self.admin, "!admin"
