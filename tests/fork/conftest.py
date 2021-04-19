@@ -49,22 +49,22 @@ def guardEth(ethVault, admin):
     yield GuardEth.deploy(ethVault, {"from": admin})
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def testErc20Deposit(TestErc20Deposit, guardErc20, whale):
     yield TestErc20Deposit.deploy(guardErc20, {"from": whale})
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def testErc20Withdraw(TestErc20Withdraw, guardErc20, testErc20Deposit, whale):
     yield TestErc20Withdraw.deploy(guardErc20, testErc20Deposit, {"from": whale})
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def testEthDeposit(TestEthDeposit, guardEth, whale):
     yield TestEthDeposit.deploy(guardEth, {"from": whale})
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def testEthWithdraw(TestEthWithdraw, guardEth, testEthDeposit, whale):
     yield TestEthWithdraw.deploy(guardEth, testEthDeposit, {"from": whale})
 

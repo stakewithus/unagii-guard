@@ -187,7 +187,7 @@ def withdraw(_shares: uint256, _min: uint256):
     # allow withdraw even if paused = true
     assert self.whitelist[msg.sender], "!whitelist"
 
-    assert block.number > self.lastBlock[tx.origin], "no flash"
+    # assert block.number > self.lastBlock[tx.origin], "no flash"
     # track EOA
     self.lastBlock[tx.origin] = block.number
 
