@@ -4,6 +4,8 @@ from brownie import (
     TestToken,
     Erc20Vault,
     GuardErc20,
+    EthVault,
+    GuardEth,
     TestErc20Deposit,
     TestErc20Withdraw,
 )
@@ -12,6 +14,11 @@ from brownie import (
 @pytest.fixture(scope="session")
 def admin(accounts):
     yield accounts[0]
+
+
+@pytest.fixture(scope="session")
+def attacker(accounts):
+    yield accounts[1]
 
 
 @pytest.fixture(scope="function")
@@ -25,13 +32,18 @@ def erc20Vault(Erc20Vault, token, admin):
 
 
 @pytest.fixture(scope="function")
+def ethVault(EthVault, admin):
+    yield EthVault.deploy({"from": admin})
+
+
+@pytest.fixture(scope="function")
 def guardErc20(GuardErc20, erc20Vault, admin):
     yield GuardErc20.deploy(erc20Vault, {"from": admin})
 
 
-@pytest.fixture(scope="session")
-def attacker(accounts):
-    yield accounts[1]
+@pytest.fixture(scope="function")
+def guardEth(GuardEth, ethVault, admin):
+    yield GuardEth.deploy(ethVault, {"from": admin})
 
 
 @pytest.fixture(scope="function")
