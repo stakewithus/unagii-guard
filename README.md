@@ -62,3 +62,21 @@ Ropsten
 # GuardEth
 0xB25dBe8955806203E8511FFce5D359fE8cAef787
 ```
+
+### Transactions
+
+USDC deposit
+
+https://etherscan.io/tx/0xaa21a4460c16140cc849ced2331b3706e326938e1415b7fabe0980c5cfbc3ab4
+
+USDC withdraw
+
+https://etherscan.io/tx/0xe135685a0bc8d9ca93c284f6464de48f0e25efe47de8e17dda4d50876073d2db
+
+ETH deposit
+
+https://etherscan.io/tx/0x86e1665126bd4ea4a258379be3b42dbd1e23b050cee6d75dbc8c1528284a05c3
+
+ETH withdraw
+
+https://etherscan.io/tx/0x272083705f37ce83a960b4136c7a419cbe280eb724fa376c1a939bd37976609e
