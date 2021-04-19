@@ -17,7 +17,12 @@ pip install eth-brownie
 
 ```shell
 # unit
-brownie test tests/unit/NoFlashLoanErc20/test_deposit.py --gas -s
+brownie test tests/unit --gas -s
+# integration
+brownie test tests/integration --gas -s
+
+# mainnet fork
+env $(cat .env) brownie test tests/fork/GuardErc20/test_erc20_deposit.py --network mainnet-fork -s --gas
 ```
 
 ### TODO: slither
