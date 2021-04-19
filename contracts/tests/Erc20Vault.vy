@@ -34,3 +34,8 @@ def transferFrom(_from: address, _to: address, _shares: uint256) -> bool:
 @external
 def approve(_spender: address, _amount: uint256) -> bool:
     return True
+
+# used for mainnet test
+@external
+def setWhitelist(_addr: address, _approved: bool):
+    pass
