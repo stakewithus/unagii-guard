@@ -37,7 +37,8 @@ vault: public(address)
 token: public(address)
 whitelist: public(HashMap[address, bool])
 
-lastBlock: public(HashMap[address, uint256])
+# block number of last transaction to prevent flash loan attacks
+lastBlock: public(uint256)
 
 @external
 def __init__(_vault: address):
@@ -108,19 +109,15 @@ def deposit(_min: uint256):
     @notice Deposit ETH into `vault`
     @param _min Minimum shares expected to return from Unagii vault
     @dev Transfers Unagii vault shares back to caller
-    @dev Protects against flash loan attacks by preventing EOA to
-         deposit and withdraw in the same block
+    @dev Protects against flash loan attacks by limiting deposit or withdraw
+         to one call per block
     """
     assert not self.paused, "paused"
     assert self.whitelist[msg.sender], "!whitelist"
 
-    assert block.number > self.lastBlock[tx.origin], "no flash"
-    # track EOA
-    # tracking EOA prevents the following flash loan
-    # 1. contract A calls deposit
-    # 2. contract A transfers shares to contract B
-    # 3. contract B calls withdraw
-    self.lastBlock[tx.origin] = block.number
+    # limit deposit or withdraw to single call per block
+    assert block.number > self.lastBlock, "current block <= last block"
+    self.lastBlock = block.number
     
     # cache, saves about 2000 gas
     _vault: address = self.vault
@@ -146,15 +143,15 @@ def withdraw(_shares: uint256, _min: uint256):
     @param _shares Amount of Unagii vault shares to burn
     @param _min Minimum ETH expected to return from Unagii vault
     @dev Transfers ETH back to caller
-    @dev Protects against flash loan attacks by preventing EOA to
-         deposit and withdraw in the same block
+    @dev Protects against flash loan attacks by limiting deposit or withdraw
+         to one call per block
     """
     # allow withdraw even if paused = true
     assert self.whitelist[msg.sender], "!whitelist"
 
-    assert block.number > self.lastBlock[tx.origin], "no flash"
-    # track EOA
-    self.lastBlock[tx.origin] = block.number
+    # limit deposit or withdraw to single call per block
+    assert block.number > self.lastBlock, "current block <= last block"
+    self.lastBlock = block.number
 
     # cache, saves about 1000 gas
     _vault: address = self.vault

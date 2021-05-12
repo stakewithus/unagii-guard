@@ -34,7 +34,7 @@ def test_withdraw(accounts, guardEth, admin, ethVault):
                 "sender": vault.balanceOf(sender),
                 "guard": vault.balanceOf(guard),
             },
-            "guard": {"lastBlock": {"sender": guard.lastBlock(sender)}},
+            "guard": {"lastBlock": guard.lastBlock()},
         }
 
     before = snapshot()
@@ -51,11 +51,8 @@ def test_withdraw(accounts, guardEth, admin, ethVault):
     assert after["vault"]["sender"] < before["vault"]["sender"]
     assert after["vault"]["guard"] == 0
     assert after["vault"]["guard"] == before["vault"]["guard"]
-    # check last block
-    assert (
-        after["guard"]["lastBlock"]["sender"] > before["guard"]["lastBlock"]["sender"]
-    )
-    assert after["guard"]["lastBlock"]["sender"] == tx.block_number
+    # check last tx
+    assert after["guard"]["lastBlock"] > before["guard"]["lastBlock"]
 
 
 def test_withdraw_not_whitelist(accounts, guardEth, admin):

@@ -26,7 +26,7 @@ def test_deposit(accounts, guardErc20, admin, token, erc20Vault):
                 "sender": vault.balanceOf(sender),
                 "guard": vault.balanceOf(guard),
             },
-            "guard": {"lastBlock": {"sender": guard.lastBlock(sender)}},
+            "guard": {"lastBlock": guard.lastBlock()},
         }
 
     before = snapshot()
@@ -44,10 +44,7 @@ def test_deposit(accounts, guardErc20, admin, token, erc20Vault):
     assert after["vault"]["guard"] == 0
     assert after["vault"]["guard"] == before["vault"]["guard"]
     # check last block
-    assert (
-        after["guard"]["lastBlock"]["sender"] > before["guard"]["lastBlock"]["sender"]
-    )
-    assert after["guard"]["lastBlock"]["sender"] == tx.block_number
+    assert after["guard"]["lastBlock"] > before["guard"]["lastBlock"]
 
 
 def test_deposit_paused(accounts, guardErc20, admin, token):
