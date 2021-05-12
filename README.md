@@ -40,7 +40,7 @@ brownie accounts new dev
 ### Deploy
 
 ```shell
-brownie run scripts/deploy.py deploy_ropsten_erc20 --network ropsten
+env $(cat .env) brownie run scripts/deploy.py deploy_ropsten_erc20 --network ropsten
 ```
 
 ### Deployed Contracts
@@ -61,6 +61,7 @@ Ropsten
 0xdeb4A1149fe09Eecff1eC25BB3008C4aD236c1b4
 # GuardEth
 0xB25dBe8955806203E8511FFce5D359fE8cAef787
+0xAd79F7d8D81f208d95903aBd0170b0d5a4F9D8bf
 ```
 
 ### Transactions
