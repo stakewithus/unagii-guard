@@ -29,7 +29,7 @@ def test_withdraw(accounts, erc20Vault, guardErc20, token, testErc20Withdraw, ad
                 "sender": vault.balanceOf(sender),
                 "guard": vault.balanceOf(guard),
             },
-            "guard": {"lastBlock": {"sender": guard.lastBlock(sender)}},
+            "guard": {"lastBlock": guard.lastBlock()},
         }
 
     before = snapshot()
@@ -47,7 +47,4 @@ def test_withdraw(accounts, erc20Vault, guardErc20, token, testErc20Withdraw, ad
     assert after["vault"]["guard"] == 0
     assert after["vault"]["guard"] == before["vault"]["guard"]
     # check last block
-    assert (
-        after["guard"]["lastBlock"]["sender"] > before["guard"]["lastBlock"]["sender"]
-    )
-    assert after["guard"]["lastBlock"]["sender"] == tx.block_number
+    assert after["guard"]["lastBlock"] > before["guard"]["lastBlock"]
